@@ -63,6 +63,16 @@ class WorkerCommand extends Console\Command\Command {
 	protected $github;
 
 	/**
+	 * @var Service\T3xExtractor
+	 */
+	protected $t3xExtractor;
+
+	/**
+	 * @var array
+	 */
+	protected $existingRepositories;
+
+	/**
 	 * Connects to the beanstalk server
 	 *
 	 * @param \Symfony\Component\Console\Input\InputInterface $input
@@ -74,8 +84,9 @@ class WorkerCommand extends Console\Command\Command {
 		$this->output = $output;
 		$this->input = $input;
 		$this->downloadService = new Service\Download\Curl();
+		$this->t3xExtractor = new Service\T3xExtractor();
 		$this->github = new \Github\Client();
-		$this->github->authenticate('7c760d73d81db8cae0669df15eb5a89e5a828fec');
+		$this->github->authenticate('4ed2c0f777b22e9d14ddf4dc99b9ff2b5701e290', '', \Github\Client::AUTH_HTTP_TOKEN);
 	}
 
 	protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output) {
@@ -95,8 +106,23 @@ class WorkerCommand extends Console\Command\Command {
 		$mapper->run();
 		$mappedResult = $mapper->getMappedResult();
 
+		$organizationRepositories = $this->github->api('organization')->repositories('typo3-ter');
+		foreach ($organizationRepositories as $organizationRepository) {
+			$this->existingRepositories[$organizationRepository['name']] = $organizationRepository['ssh_url'];
+		}
+
 		foreach ($mappedResult as $extension) {
-			$this->beanstalk->putInTube('extensions', serialize($extension));
+			try {
+				$this->github->api('git')->tags()->all('typo3-ter', $extension->getKey());
+			} catch (\Exception $e) {
+				if (array_key_exists($extension->getKey(), $this->existingRepositories) === FALSE) {
+					$this->github->api('repository')->create($extension->getKey(), '', 'http://typo3.org/extensions/repository/view/' . $extension->getKey(), TRUE, 'typo3-ter');
+				}
+
+				$extension->setRepositoryPath($this->existingRepositories[$extension->getKey()]);
+
+				$this->beanstalk->putInTube('extensions', serialize($extension));
+			}
 		}
 	}
 
@@ -110,13 +136,48 @@ class WorkerCommand extends Console\Command\Command {
 		$job = $this->beanstalk->watch('extensions')->reserve();
 
 		/** @var $extInfo Model\Extension */
-		$extInfo = unserialize($job->getData());
-		var_dump($extInfo);
+		$extension = unserialize($job->getData());
+		$this->output->writeln('Starting job ' . $job->getId() . ': "' . $extension->getKey() . '"');
 
-		$this->output->writeln('Starting job ' . $job->getId() . ': "' . $extInfo->getKey() . '"');
+		$extensionDir = $this->getTempPath() . '/Extension/' . $extension->getKey() . '/';
+
+		if (is_dir($extensionDir)) {
+			exec('rm -R ' . escapeshellarg($extensionDir));
+		}
+
+		if (is_dir($extensionDir) === FALSE) {
+			mkdir($extensionDir, 0777, TRUE);
+		}
+		$this->beanstalk->delete($job);
+print_r($job); die();
+		exec(
+			'cd ' . escapeshellarg($extensionDir)
+				. ' && git init'
+				. ' && git remote add origin ' . $extension->getRepositoryPath()
+		);
+
+		foreach ($extension->getVersions() as $extensionVersion) {
+			$t3xPath = $extensionDir . $extension->getKey() . '.t3x';
+			file_put_contents($t3xPath, file_get_contents('http://typo3.org/extensions/repository/download/view/1.0.0/t3x/'));
+			$this->t3xExtractor->setT3xFileName($t3xPath);
+			$this->t3xExtractor->setExtensionDir($extensionDir);
+			$this->t3xExtractor->extract();
+			unlink($t3xPath);
+			exec(
+				'cd ' . escapeshellarg($extensionDir)
+					. ' && git add -A'
+					. ' && git commit -m "Import of Version ' . $extensionVersion->getNumber() . '"'
+					. ' && git tag -a ' . $extensionVersion->getNumber()
+					. ' && git push --tags origin master'
+			);
+		}
 
 		$this->output->writeln('Finished job (ID: ' . $job->getId() . ')');
 		$this->beanstalk->delete($job);
+	}
+
+	protected function getTempPath() {
+		return getcwd() . '/Temp';
 	}
 }
 ?>

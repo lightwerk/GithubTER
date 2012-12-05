@@ -74,6 +74,11 @@ class Extension {
 	 */
 	protected $authors;
 
+	/**
+	 * @var string
+	 */
+	protected $repositoryPath;
+
 	public function __construct() {
 		$this->versions = new \SplObjectStorage();
 		$this->authors = new \SplObjectStorage();
@@ -211,6 +216,20 @@ class Extension {
 	 */
 	public function getZipURL(Version $version) {
 		return sprintf(self::$TER_ZIP_PATH, $this->getKey(), $version->getNumber());
+	}
+
+	/**
+	 * @param string $repositoryPath
+	 */
+	public function setRepositoryPath($repositoryPath) {
+		$this->repositoryPath = $repositoryPath;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getRepositoryPath() {
+		return $this->repositoryPath;
 	}
 }
 ?>
