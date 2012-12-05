@@ -38,5 +38,6 @@ $loader->registerNamespaces(array(
     'GithubTER' => __DIR__
 ));
 $loader->registerPrefix('Pheanstalk', __DIR__ . '/../Vendor/Pheanstalk/classes');
+$loader->registerPrefix('Github', __DIR__ . '/../Vendor/Github/lib/');
 $loader->register();
 ?>

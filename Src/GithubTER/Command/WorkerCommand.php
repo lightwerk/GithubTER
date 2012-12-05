@@ -58,6 +58,11 @@ class WorkerCommand extends Console\Command\Command {
 	protected $downloadService;
 
 	/**
+	 * @var Github_Client
+	 */
+	protected $github;
+
+	/**
 	 * Connects to the beanstalk server
 	 *
 	 * @param \Symfony\Component\Console\Input\InputInterface $input
@@ -69,6 +74,7 @@ class WorkerCommand extends Console\Command\Command {
 		$this->output = $output;
 		$this->input = $input;
 		$this->downloadService = new Service\Download\Curl();
+		$this->github = new \Github_Client();
 	}
 
 	protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output) {
