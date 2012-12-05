@@ -74,17 +74,19 @@ class ExtensionMapper extends XmlMapper {
 				) {
 					$authorObj = $this->mapAuthor(new Model\Author(), $version);
 
+					/** @var $versionObj \GithubTER\Domain\Model\Version */
 					$versionObj = $this->mapVersion(new Model\Version(), $version);
 					$versionObj->setAuthor($authorObj);
+					$versionObj->setDependencies((string)$version->dependencies);
 
 					$extensionObj->setTitle((string) $version->title);
 					$extensionObj->setDescription((string) $version->description);
 					$extensionObj->setState((string) $version->state);
 					$extensionObj->setLastModified((int) $version->lastuploaddate);
-					$extensionObj->addAuthor($authorObj);
 					$extensionObj->addVersion($versionObj);
 				}
 			}
+			$extensionObj->addAuthor($authorObj);
 
 			if (count($extensionObj->getVersions()) > 0) {
 				$this->mappedResult->attach($extensionObj);
