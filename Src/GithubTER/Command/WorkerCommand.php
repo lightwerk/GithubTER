@@ -65,7 +65,7 @@ class WorkerCommand extends Console\Command\Command {
 	 * @return void
 	 */
 	protected function initialize(Console\Input\InputInterface $input, Console\Output\OutputInterface $output) {
-		$this->beanstalk = new \Pheanstalk('127.0.0.1');
+		$this->beanstalk = new \Pheanstalk('192.168.1.254');
 		$this->output = $output;
 		$this->input = $input;
 		$this->downloadService = new Service\Download\Curl();
