@@ -73,6 +73,10 @@ class ExtensionListCommand extends Console\Command\Command {
 			'to: "' . $this->getTempPath() . '"'
 		));
 
+		if (is_dir($this->getTempPath()) === FALSE) {
+			mkdir($this->getTempPath());
+		}
+
 		file_put_contents($this->getTempPath() . '/extensions.xml.gz', file_get_contents($this->getExtensionListUrl()));
 
 		$this->output->writeln(
