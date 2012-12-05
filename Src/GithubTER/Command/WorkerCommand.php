@@ -98,6 +98,10 @@ class WorkerCommand extends Console\Command\Command {
 		if ($input->getOption('tag')) {
 			$this->tag();
 		}
+
+		if ($input->getOption('clearqueue')) {
+			$this->clearqueue();
+		}
 	}
 
 	protected function parse() {
@@ -112,17 +116,33 @@ class WorkerCommand extends Console\Command\Command {
 		}
 
 		foreach ($mappedResult as $extension) {
+			$existingTags = array();
 			try {
-				$this->github->api('git')->tags()->all('typo3-ter', $extension->getKey());
+				$tags = $this->github->api('git')->tags()->all('typo3-ter', $extension->getKey());
+
+				foreach ($tags as $tag) {
+					$existingTags[] = trim($tag['ref'], 'refs/tags/');
+				}
 			} catch (\Exception $e) {
 				if (array_key_exists($extension->getKey(), $this->existingRepositories) === FALSE) {
 					$this->github->api('repository')->create($extension->getKey(), '', 'http://typo3.org/extensions/repository/view/' . $extension->getKey(), TRUE, 'typo3-ter');
 				}
 
 				$extension->setRepositoryPath($this->existingRepositories[$extension->getKey()]);
-
-				$this->beanstalk->putInTube('extensions', serialize($extension));
+				//$this->beanstalk->putInTube('extensions', serialize($extension));
 			}
+			$versions = $extension->getVersions();
+			foreach ($versions as $version) {
+				echo $version->getNumber();
+				if (in_array($version->getNumber(), $existingTags)) {
+					$this->output->writeln('Version ' . $version->getNumber() . ' is already tagged');
+					$extension->removeVersion($version);
+				}
+			}
+
+			//print_r($existingTags);
+			//print_r($extension);
+			die();
 		}
 	}
 
@@ -141,39 +161,57 @@ class WorkerCommand extends Console\Command\Command {
 
 		$extensionDir = $this->getTempPath() . '/Extension/' . $extension->getKey() . '/';
 
-		if (is_dir($extensionDir)) {
-			exec('rm -R ' . escapeshellarg($extensionDir));
-		}
-
-		if (is_dir($extensionDir) === FALSE) {
-			mkdir($extensionDir, 0777, TRUE);
-		}
-		$this->beanstalk->delete($job);
-print_r($job); die();
-		exec(
-			'cd ' . escapeshellarg($extensionDir)
-				. ' && git init'
-				. ' && git remote add origin ' . $extension->getRepositoryPath()
-		);
-
 		foreach ($extension->getVersions() as $extensionVersion) {
+			if (is_dir($extensionDir)) {
+				$this->output->writeln('Removing directory ' . $extensionDir);
+				exec('rm -Rf ' . escapeshellarg($extensionDir));
+			}
+
+			$this->output->writeln('Creating directory ' . $extensionDir);
+			mkdir($extensionDir, 0777, TRUE);
+
+			$this->output->writeln('Initializing GIT-Repository');
+			exec(
+				'cd ' . escapeshellarg($extensionDir)
+					. ' && git init'
+					. ' && git remote add origin ' . $extension->getRepositoryPath()
+			);
+
+			try {
+				$this->github->api('repository')->commits()->all('typo3-ter', $extension->getKey(), array());
+				$this->output->writeln('Commit found -> pulling');
+				exec('cd ' . escapeshellarg($extensionDir) . ' && git pull -q origin master');
+			} catch (\Exception $e) {
+				$this->output->writeln('No Commit found');
+			}
+
 			$t3xPath = $extensionDir . $extension->getKey() . '.t3x';
-			file_put_contents($t3xPath, file_get_contents('http://typo3.org/extensions/repository/download/view/1.0.0/t3x/'));
+			$this->output->writeln('Downloading version ' . $extensionVersion->getNumber());
+			file_put_contents($t3xPath, file_get_contents('http://typo3.org/extensions/repository/download/' . $extension->getKey() . '/' . $extensionVersion->getNumber() . '/t3x/'));
 			$this->t3xExtractor->setT3xFileName($t3xPath);
 			$this->t3xExtractor->setExtensionDir($extensionDir);
 			$this->t3xExtractor->extract();
 			unlink($t3xPath);
+			$this->output->writeln('Committing, tagging and pushing version ' . $extensionVersion->getNumber());
 			exec(
 				'cd ' . escapeshellarg($extensionDir)
 					. ' && git add -A'
 					. ' && git commit -m "Import of Version ' . $extensionVersion->getNumber() . '"'
-					. ' && git tag -a ' . $extensionVersion->getNumber()
+					. ' && git tag -a -m "Version ' . $extensionVersion->getNumber() . '" ' . $extensionVersion->getNumber()
 					. ' && git push --tags origin master'
 			);
 		}
 
 		$this->output->writeln('Finished job (ID: ' . $job->getId() . ')');
 		$this->beanstalk->delete($job);
+	}
+
+	protected function clearqueue() {
+		while ($job = $this->beanstalk->watch('extensions')->reserve()) {
+			$this->output->writeln('Deleting job #' . $job->getId());
+			$this->beanstalk->delete($job);
+		}
+		$this->output->writeln('Finished clearing the queue');
 	}
 
 	protected function getTempPath() {

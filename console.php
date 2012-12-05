@@ -62,6 +62,12 @@ $application->add(new GithubTER\Command\WorkerCommand('worker'))
 				Console\Input\InputOption::VALUE_NONE,
 				'Asks for a job, downloads the ext and tags it'
 			)
+			->addOption(
+				'clearqueue',
+				'c',
+				Console\Input\InputOption::VALUE_NONE,
+				'Clears all the jobs from the queue'
+			)
 			->addArgument(
 				'extensionlist',
 				NULL,
