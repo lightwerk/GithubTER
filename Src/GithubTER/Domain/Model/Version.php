@@ -60,6 +60,11 @@ class Version {
 	protected $state;
 
 	/**
+	 * @var array
+	 */
+	protected $dependencies;
+
+	/**
 	 * @param \GithubTER\Domain\Model\Author $author
 	 */
 	public function setAuthor($author) {
@@ -128,5 +133,26 @@ class Version {
 	public function getUploadDate() {
 		return $this->uploadDate;
 	}
+
+	/**
+	 * @param array $dependencies
+	 */
+	public function setDependencies($dependencies) {
+		if (is_string($dependencies)) {
+			$dependencies = unserialize($dependencies);
+			if (!is_array($dependencies)) {
+				$dependencies = array();
+			}
+		}
+		$this->dependencies = $dependencies;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getDependencies() {
+		return $this->dependencies;
+	}
+
 }
 ?>
