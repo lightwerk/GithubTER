@@ -10,3 +10,6 @@
 [submodule "vendor/Symfony/Component/Yaml"]
 	path = vendor/Symfony/Component/Yaml
 	url = https://github.com/symfony/Yaml.git
+[submodule "vendor/Github"]
+	path = vendor/Github
+	url = git://github.com/KnpLabs/php-github-api.git
