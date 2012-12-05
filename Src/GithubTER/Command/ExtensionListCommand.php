@@ -74,6 +74,7 @@ class ExtensionListCommand extends Console\Command\Command {
 		));
 
 		if (is_dir($this->getTempPath()) === FALSE) {
+			$this->output->writeln('Temp-Path "' . $this->getTempPath() . ' didn_t exist: creating.');
 			mkdir($this->getTempPath());
 		}
 
