@@ -13,3 +13,6 @@
 [submodule "vendor/Github"]
 	path = vendor/Github
 	url = git://github.com/KnpLabs/php-github-api.git
+[submodule "vendor/Buzz"]
+	path = vendor/Buzz
+	url = git://github.com/kriswallsmith/Buzz.git

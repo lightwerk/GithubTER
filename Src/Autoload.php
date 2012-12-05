@@ -35,9 +35,10 @@ require_once __DIR__.'/../Vendor/Symfony/Component/ClassLoader/UniversalClassLoa
 $loader = new Symfony\Component\ClassLoader\UniversalClassLoader();
 $loader->registerNamespaces(array(
     'Symfony' => __DIR__ . '/../vendor',
+	'Buzz' => __DIR__ . '/../vendor/Buzz/lib',
+	'Github' => __DIR__ . '/../vendor/Github/lib',
     'GithubTER' => __DIR__
 ));
 $loader->registerPrefix('Pheanstalk', __DIR__ . '/../vendor/Pheanstalk/classes');
-$loader->registerPrefix('Github', __DIR__ . '/../vendor/Github/lib/');
 $loader->register();
 ?>

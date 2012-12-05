@@ -58,7 +58,7 @@ class WorkerCommand extends Console\Command\Command {
 	protected $downloadService;
 
 	/**
-	 * @var Github_Client
+	 * @var \Github\Client
 	 */
 	protected $github;
 
@@ -74,7 +74,8 @@ class WorkerCommand extends Console\Command\Command {
 		$this->output = $output;
 		$this->input = $input;
 		$this->downloadService = new Service\Download\Curl();
-		$this->github = new \Github_Client();
+		$this->github = new \Github\Client();
+		$this->github->authenticate('7c760d73d81db8cae0669df15eb5a89e5a828fec');
 	}
 
 	protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output) {
