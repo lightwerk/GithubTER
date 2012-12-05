@@ -111,14 +111,10 @@ class ExtensionListCommand extends Console\Command\Command {
 	 * @return void
 	 */
 	protected function info() {
-		if (is_file($this->getTempPath() . '/extensions.xml')) {
-			$this->output->writeln(array(
-				'Last update: ' . date('r', filemtime($this->getTempPath() . '/extensions.xml')),
-				'Filesize: ' . round(filesize($this->getTempPath() . '/extensions.xml') / 1024 / 1024) . 'MB'
-			));
-		} else {
-			$this->output->writeln('No extension list yet downloaded!');
-		}
+		$this->output->writeln(array(
+			'Last update: ' . date('r', filemtime($this->getTempPath() . '/extensions.xml')),
+			'Filesize: ' . round(filesize($this->getTempPath() . '/extensions.xml') / 1024 / 1024) . 'MB'
+		));
 	}
 
 	/**
