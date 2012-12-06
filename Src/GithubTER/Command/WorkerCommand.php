@@ -80,7 +80,7 @@ class WorkerCommand extends Console\Command\Command {
 	 * @return void
 	 */
 	protected function initialize(Console\Input\InputInterface $input, Console\Output\OutputInterface $output) {
-		$this->beanstalk = new \Pheanstalk('192.168.1.254');
+		$this->beanstalk = new \Pheanstalk('ec2-79-125-88-135.eu-west-1.compute.amazonaws.com');
 		$this->output = $output;
 		$this->input = $input;
 		$this->downloadService = new Service\Download\Curl();
