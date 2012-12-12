@@ -35,9 +35,9 @@ namespace GithubTER\Service;
 class EmConfWriter {
 
 	public function constructEmConf(array $extensionData, \GithubTER\Domain\Model\Version $extensionVersion = NULL) {
-//		if (!is_null($extensionVersion)) {
-//			$extensionData['EM_CONF']['constraints'] = $extensionVersion->getDependencies();
-//		}
+		if (!is_null($extensionVersion)) {
+			$extensionData['EM_CONF']['constraints'] = $this->convertDependencies($extensionVersion->getDependencies());
+		}
 
 		$emConf = $this->fixEmConf($extensionData['EM_CONF']);
 		$emConf = var_export($emConf, TRUE);
@@ -140,5 +140,15 @@ $EM_CONF[$_EXTKEY] = ' . $emConf . ';
 			}
 		}
 		return $constraint;
+	}
+
+	protected function convertDependencies($dependenciesArray) {
+		$newDependencies = array();
+		if (is_array($dependenciesArray)) {
+			foreach ($dependenciesArray as $version) {
+				$newDependencies[$version['kind']][$version['extensionKey']] = $version['versionRange'];
+			}
+		}
+		return ($newDependencies);
 	}
 }
