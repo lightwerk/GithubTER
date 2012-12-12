@@ -24,11 +24,9 @@
 
 
 /**
- * $DESCRIPTION$
+ * Author of an extension (version=
  *
  * @author    Philipp Bergsmann <p.bergsmann@opendo.at>
- * @package $PACKAGE$
- * @subpackage $SUBPACKAGE$
  */
 
 namespace GithubTER\Domain\Model;
@@ -48,6 +46,11 @@ class Author {
 	 * @var string
 	 */
 	protected $username;
+
+	/**
+	 * @var string
+	 */
+	protected $companty;
 
 	/**
 	 * @param string $email
@@ -90,5 +93,20 @@ class Author {
 	public function getUsername() {
 		return $this->username;
 	}
+
+	/**
+	 * @param string $companty
+	 */
+	public function setCompanty($companty) {
+		$this->companty = $companty;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getCompanty() {
+		return $this->companty;
+	}
+
 }
 ?>

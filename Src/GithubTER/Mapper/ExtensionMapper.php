@@ -65,12 +65,12 @@ class ExtensionMapper extends XmlMapper {
 
 		foreach ($extensions->extension as $extension) {
 			$extensionObj = new Model\Extension();
-			$extensionObj->setKey((string) $extension['extensionkey']);
+			$extensionObj->setKey((string)$extension['extensionkey']);
 
 			foreach ($extension->version as $version) {
 				if (
-					(int) $version->lastuploaddate >= $this->getFromDate()
-					&& (int) $version->lastuploaddate <= $this->getToDate()
+					(int)$version->lastuploaddate >= $this->getFromDate()
+					&& (int)$version->lastuploaddate <= $this->getToDate()
 				) {
 					$authorObj = $this->mapAuthor(new Model\Author(), $version);
 
@@ -78,11 +78,19 @@ class ExtensionMapper extends XmlMapper {
 					$versionObj = $this->mapVersion(new Model\Version(), $version);
 					$versionObj->setAuthor($authorObj);
 					$versionObj->setDependencies((string)$version->dependencies);
+					$versionObj->setDescription((string)$version->description);
+					$versionObj->setState((string)$version->state);
+					$versionObj->setReviewState((string)$version->reviewstate);
+					$versionObj->setCategory((string)$version->category);
+					$versionObj->setDownloadcounter((string)$version->downloadcounter);
+					$versionObj->setUploadComment((string)$version->uploadcomment);
+					$versionObj->setT3xFileMd5((string)$version->t3xfilemd5);
 
-					$extensionObj->setTitle((string) $version->title);
-					$extensionObj->setDescription((string) $version->description);
-					$extensionObj->setState((string) $version->state);
-					$extensionObj->setLastModified((int) $version->lastuploaddate);
+
+					$extensionObj->setTitle((string)$version->title);
+					$extensionObj->setDescription((string)$version->description);
+					$extensionObj->setState((string)$version->state);
+					$extensionObj->setLastModified((int)$version->lastuploaddate);
 					$extensionObj->addVersion($versionObj);
 				}
 			}
@@ -102,9 +110,10 @@ class ExtensionMapper extends XmlMapper {
 	 * @return \GithubTER\Domain\Model\Author
 	 */
 	protected function mapAuthor(Model\Author $authorObj, $version) {
-		$authorObj->setEmail((string) $version->authoremail);
-		$authorObj->setName((string) $version->authorname);
-		$authorObj->setUsername((string) $version->ownerusername);
+		$authorObj->setEmail((string)$version->authoremail);
+		$authorObj->setName((string)$version->authorname);
+		$authorObj->setUsername((string)$version->ownerusername);
+		$authorObj->setCompanty((string)$version->authorcompany);
 
 		return $authorObj;
 	}
@@ -117,10 +126,10 @@ class ExtensionMapper extends XmlMapper {
 	 * @return \GithubTER\Domain\Model\Version
 	 */
 	protected function mapVersion(Model\Version $versionObj, $version) {
-		$versionObj->setNumber((string) $version['version']);
-		$versionObj->setState((string) $version->state);
-		$versionObj->setUploadComment((string) $version->uploadcomment);
-		$versionObj->setUploadDate((int) $version->lastuploaddate);
+		$versionObj->setNumber((string)$version['version']);
+		$versionObj->setState((string)$version->state);
+		$versionObj->setUploadComment((string)$version->uploadcomment);
+		$versionObj->setUploadDate((int)$version->lastuploaddate);
 
 		return $versionObj;
 	}
@@ -153,4 +162,5 @@ class ExtensionMapper extends XmlMapper {
 		return $this->toDate;
 	}
 }
+
 ?>

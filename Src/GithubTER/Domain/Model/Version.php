@@ -22,18 +22,16 @@
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-
 /**
- * $DESCRIPTION$
+ * Version of an extension
  *
  * @author    Philipp Bergsmann <p.bergsmann@opendo.at>
- * @package $PACKAGE$
- * @subpackage $SUBPACKAGE$
  */
 
 namespace GithubTER\Domain\Model;
 
 class Version {
+
 	/**
 	 * @var string
 	 */
@@ -42,17 +40,12 @@ class Version {
 	/**
 	 * @var string
 	 */
-	protected $uploadComment;
+	protected $title;
 
 	/**
-	 * @var Author
+	 * @var string
 	 */
-	protected $author;
-
-	/**
-	 * @var int
-	 */
-	protected $uploadDate;
+	protected $description;
 
 	/**
 	 * @var version
@@ -60,9 +53,46 @@ class Version {
 	protected $state;
 
 	/**
+	 * @var string
+	 */
+	protected $reviewState;
+
+	/**
+	 * @var string
+	 */
+	protected $category;
+
+	/**
+	 * @var integer
+	 */
+	protected $downloadcounter;
+
+	/**
+	 * @var int
+	 */
+	protected $uploadDate;
+
+	/**
+	 * @var string
+	 */
+	protected $uploadComment;
+
+	/**
 	 * @var array
 	 */
 	protected $dependencies;
+
+
+	/**
+	 * @var Author
+	 */
+	protected $author;
+
+	/**
+	 * @var string
+	 */
+	protected $t3xFileMd5;
+
 
 	/**
 	 * @param \GithubTER\Domain\Model\Author $author
@@ -154,5 +184,90 @@ class Version {
 		return $this->dependencies;
 	}
 
+	/**
+	 * @param string $category
+	 */
+	public function setCategory($category) {
+		$this->category = $category;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getCategory() {
+		return $this->category;
+	}
+
+	/**
+	 * @param string $description
+	 */
+	public function setDescription($description) {
+		$this->description = $description;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getDescription() {
+		return $this->description;
+	}
+
+	/**
+	 * @param int $downloadcounter
+	 */
+	public function setDownloadcounter($downloadcounter) {
+		$this->downloadcounter = $downloadcounter;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getDownloadcounter() {
+		return $this->downloadcounter;
+	}
+
+	/**
+	 * @param string $reviewState
+	 */
+	public function setReviewState($reviewState) {
+		$this->reviewState = $reviewState;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getReviewState() {
+		return $this->reviewState;
+	}
+
+	/**
+	 * @param string $t3xFileMd5
+	 */
+	public function setT3xFileMd5($t3xFileMd5) {
+		$this->t3xFileMd5 = $t3xFileMd5;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getT3xFileMd5() {
+		return $this->t3xFileMd5;
+	}
+
+	/**
+	 * @param string $title
+	 */
+	public function setTitle($title) {
+		$this->title = $title;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getTitle() {
+		return $this->title;
+	}
+
 }
+
 ?>
