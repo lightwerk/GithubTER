@@ -190,6 +190,7 @@ class WorkerCommand extends Console\Command\Command {
 			file_put_contents($t3xPath, file_get_contents('http://typo3.org/extensions/repository/download/' . $extension->getKey() . '/' . $extensionVersion->getNumber() . '/t3x/'));
 			$this->t3xExtractor->setT3xFileName($t3xPath);
 			$this->t3xExtractor->setExtensionDir($extensionDir);
+			$this->t3xExtractor->setExtensionVersion($extensionVersion);
 			$this->t3xExtractor->extract();
 			unlink($t3xPath);
 

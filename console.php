@@ -35,6 +35,11 @@ require_once __DIR__.'/Src/Autoload.php';
 
 use Symfony\Component\Console as Console;
 
+define('TAB', chr(9));
+define('LF', chr(10));
+define('CR', chr(13));
+define('CRLF', CR . LF);
+
 $application = new Console\Application('Github TYPO3 Extension Repository (TER) Mirror', '0.1.0');
 $application->add(new GithubTER\Command\ExtensionListCommand('extensionlist'))
 			->addOption(

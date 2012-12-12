@@ -24,15 +24,14 @@
 
 
 /**
- * $DESCRIPTION$
+ * Extract a T3x file to directories and files
  *
  * @author    Philipp Bergsmann <p.bergsmann@opendo.at>
- * @package $PACKAGE$
- * @subpackage $SUBPACKAGE$
  */
 namespace GithubTER\Service;
 
 class T3xExtractor {
+
 	/**
 	 * @var string
 	 */
@@ -58,13 +57,18 @@ class T3xExtractor {
 	 */
 	protected $extensionDir;
 
-	public function extract() {
+	/**
+	 * @var \GithubTER\Domain\Model\Version
+	 */
+	protected $extensionVersion;
 
+	public function extract() {
 		$this->fileContent = file_get_contents($this->t3xFileName);
 		$this->parseFileParts();
 		$this->directories = $this->extractDirectoriesFromExtensionData();
 		$this->createDirectoriesForExtensionFiles();
 		$this->writeExtensionFiles();
+		$this->writeExtEmconf();
 	}
 
 	/**
@@ -116,6 +120,13 @@ class T3xExtractor {
 		}
 	}
 
+	protected function writeExtEmconf() {
+		$emConfWriter = new EmConfWriter();
+		$content = $emConfWriter->constructEmConf($this->files, $this->extensionVersion);
+
+		file_put_contents($this->extensionDir . 'ext_emconf.php', $content);
+	}
+
 	/**
 	 * @param string $t3xFileName
 	 */
@@ -146,5 +157,21 @@ class T3xExtractor {
 	public function getExtensionDir() {
 		return $this->extensionDir;
 	}
+
+	/**
+	 * @param \GithubTER\Domain\Model\Version $extensionVersion
+	 */
+	public function setExtensionVersion($extensionVersion) {
+		$this->extensionVersion = $extensionVersion;
+	}
+
+	/**
+	 * @return \GithubTER\Domain\Model\Version
+	 */
+	public function getExtensionVersion() {
+		return $this->extensionVersion;
+	}
+
+
 }
 ?>
