@@ -129,7 +129,7 @@ class WorkerCommand extends Console\Command\Command {
 				}
 
 				$extension->setRepositoryPath($this->existingRepositories[$extension->getKey()]);
-				//$this->beanstalk->putInTube('extensions', serialize($extension));
+				$this->beanstalk->putInTube('extensions', serialize($extension));
 			}
 			$versions = $extension->getVersions();
 			foreach ($versions as $version) {
@@ -192,6 +192,11 @@ class WorkerCommand extends Console\Command\Command {
 			$this->t3xExtractor->setExtensionDir($extensionDir);
 			$this->t3xExtractor->extract();
 			unlink($t3xPath);
+
+			$this->output->writeln('Generate custom README.md');
+			$readmeWriter = new Service\ReadmeWriter($extension);
+			$readmeWriter->write();
+
 			$this->output->writeln('Committing, tagging and pushing version ' . $extensionVersion->getNumber());
 			exec(
 				'cd ' . escapeshellarg($extensionDir)
