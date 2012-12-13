@@ -93,7 +93,7 @@ class WorkerCommand extends Console\Command\Command {
 		if ($input->getOption('parse') === TRUE) {
 			$output->writeln('Starting parser (file: ' . $this->input->getArgument('extensionlist') . ')');
 			$extensions = $this->input->getArgument('extensions');
-			if (!empty($extensions )) {
+			if (!empty($extensions)) {
 				$output->writeln(sprintf(TAB . 'including the extensions "%s".', $extensions));
 			}
 			$this->parse($extensions);
@@ -189,25 +189,31 @@ class WorkerCommand extends Console\Command\Command {
 
 			$t3xPath = $extensionDir . $extension->getKey() . '.t3x';
 			$this->output->writeln('Downloading version ' . $extensionVersion->getNumber());
-			file_put_contents($t3xPath, file_get_contents('http://typo3.org/extensions/repository/download/' . $extension->getKey() . '/' . $extensionVersion->getNumber() . '/t3x/'));
-			$this->t3xExtractor->setT3xFileName($t3xPath);
-			$this->t3xExtractor->setExtensionDir($extensionDir);
-			$this->t3xExtractor->setExtensionVersion($extensionVersion);
-			$this->t3xExtractor->extract();
-			unlink($t3xPath);
 
-			$this->output->writeln('Generate custom README.md');
-			$readmeWriter = new Service\ReadmeWriter($extension);
-			$readmeWriter->write();
+			$downloadedExtension = @file_get_contents('http://typo3.org/extensions/repository/download/' . $extension->getKey() . '/' . $extensionVersion->getNumber() . '/t3x/');
+			if ($downloadedExtension === FALSE) {
+				$this->output->writeln(sprintf('ERROR: Version "%s" of extension "%s" could not be downloaded!', $extensionVersion->getNumber(), $extension->getKey()));
+			} else {
+				file_put_contents($t3xPath, $downloadedExtension);
+				$this->t3xExtractor->setT3xFileName($t3xPath);
+				$this->t3xExtractor->setExtensionDir($extensionDir);
+				$this->t3xExtractor->setExtensionVersion($extensionVersion);
+				$this->t3xExtractor->extract();
+				unlink($t3xPath);
 
-			$this->output->writeln('Committing, tagging and pushing version ' . $extensionVersion->getNumber());
-			exec(
-				'cd ' . escapeshellarg($extensionDir)
-					. ' && git add -A'
-					. ' && git commit -m "Import of Version ' . $extensionVersion->getNumber() . '"'
-					. ' && git tag -a -m "Version ' . $extensionVersion->getNumber() . '" ' . $extensionVersion->getNumber()
-					. ' && git push --tags origin master'
-			);
+				$this->output->writeln('Generate custom README.md');
+				$readmeWriter = new Service\ReadmeWriter($extension);
+				$readmeWriter->write();
+
+				$this->output->writeln('Committing, tagging and pushing version ' . $extensionVersion->getNumber());
+				exec(
+					'cd ' . escapeshellarg($extensionDir)
+						. ' && git add -A'
+						. ' && git commit -m "Import of Version ' . $extensionVersion->getNumber() . '"'
+						. ' && git tag -a -m "Version ' . $extensionVersion->getNumber() . '" ' . $extensionVersion->getNumber()
+						. ' && git push --tags origin master'
+				);
+			}
 		}
 
 		$this->output->writeln('Finished job (ID: ' . $job->getId() . ')');
@@ -226,4 +232,5 @@ class WorkerCommand extends Console\Command\Command {
 		return getcwd() . '/Temp';
 	}
 }
+
 ?>
