@@ -5,9 +5,19 @@ This project tries to synchronize all extensions from the TYPO3 TER to github, i
 ### How to use ###
 
 #### Update local extension list ###
-Use console.php extensionlist -u to fetch the extension list
+`console.php extensionlist -u` to fetch the extension list
 
-Use console.php extensionlist -i for some information
+`console.php extensionlist -i` for some information
+
+#### Push extensions to github ###
+`console.php worker --parse` to parse the local extension list and put it into the queue.
+
+**Tip**: You can use `console.php worker --parse fo,bar` to load only the given extensions ("fo" and "bar").
+
+`console.php worker --tag` to get the jobs done from the queue.
+
+`console.php worker --clearqueue` to clear the queue.
+
 
 ## Authors ##
 - Philipp Bergsmann http://www.opendo.at
