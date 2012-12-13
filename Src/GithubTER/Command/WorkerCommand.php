@@ -218,7 +218,7 @@ class WorkerCommand extends Console\Command\Command {
 						. ' && git add -A'
 						. ' && git commit -m "Import of Version ' . $extensionVersion->getNumber() . '"'
 						. ' && git tag -a -m "Version ' . $extensionVersion->getNumber() . '" ' . $extensionVersion->getNumber()
-						. ' '
+						. ' && git push --tags origin master'
 				);
 
 			}
