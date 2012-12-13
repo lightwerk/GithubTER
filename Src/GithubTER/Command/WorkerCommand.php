@@ -157,7 +157,7 @@ class WorkerCommand extends Console\Command\Command {
 		/** @var $job \Pheanstalk_Job */
 		$job = $this->beanstalk->watch('extensions')->reserve();
 
-		/** @var $extInfo Model\Extension */
+		/** @var $extension Model\Extension */
 		$extension = unserialize($job->getData());
 		$this->output->writeln('Starting job ' . $job->getId() . ': "' . $extension->getKey() . '"');
 
@@ -176,7 +176,7 @@ class WorkerCommand extends Console\Command\Command {
 			exec(
 				'cd ' . escapeshellarg($extensionDir)
 					. ' && git init'
-					. ' && git remote add origin ' . $extension->getRepositoryPath()
+					. ' && git remote add origin ' . str_replace('git@github.com', 'git@github-ter', $extension->getRepositoryPath())
 			);
 
 			try {
