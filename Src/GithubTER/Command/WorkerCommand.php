@@ -184,11 +184,7 @@ class WorkerCommand extends Console\Command\Command {
 				$this->output->writeln('Commit found -> pulling');
 				exec('cd ' . escapeshellarg($extensionDir) . ' && git pull -q origin master');
 				// move .git dir out, remove everything and move it back in
-				exec('cd ' . escapeshellarg($extensionDir)
-						. ' mv .git ../.tmpgit'
-						. ' rm -rf * .*'
-						. ' mv ../.tmpgit .git'
-				);
+				exec('cd ' . escapeshellarg($extensionDir) . ' find . -path "*/.git*" -o -delete');
 
 			} catch (\Exception $e) {
 				$this->output->writeln('No Commit found');
