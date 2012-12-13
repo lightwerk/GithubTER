@@ -90,7 +90,6 @@ class WorkerCommand extends Console\Command\Command {
 	}
 
 	protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output) {
-		print_r($input);
 		if ($input->getOption('parse') === TRUE) {
 			$output->writeln('Starting parser (file: ' . $this->input->getArgument('extensionlist') . ')');
 			$extensions = $this->input->getArgument('extensions');
@@ -125,29 +124,29 @@ class WorkerCommand extends Console\Command\Command {
 
 		foreach ($mappedResult as $extension) {
 			echo '=>' . $extension->getKey() . chr(10);
-//			$existingTags = array();
-//			try {
-//				$tags = $this->github->api('git')->tags()->all('typo3-ter', $extension->getKey());
-//
-//				foreach ($tags as $tag) {
-//					$existingTags[] = trim($tag['ref'], 'refs/tags/');
-//				}
-//			} catch (\Exception $e) {
-//				if (array_key_exists($extension->getKey(), $this->existingRepositories) === FALSE) {
-//					$this->github->api('repository')->create($extension->getKey(), '', 'http://typo3.org/extensions/repository/view/' . $extension->getKey(), TRUE, 'typo3-ter');
-//				}
-//
-//				$extension->setRepositoryPath($this->existingRepositories[$extension->getKey()]);
-//				$this->beanstalk->putInTube('extensions', serialize($extension));
-//			}
-//			$versions = $extension->getVersions();
-//			foreach ($versions as $version) {
-//				echo $version->getNumber();
-//				if (in_array($version->getNumber(), $existingTags)) {
-//					$this->output->writeln('Version ' . $version->getNumber() . ' is already tagged');
-//					$extension->removeVersion($version);
-//				}
-//			}
+			$existingTags = array();
+			try {
+				$tags = $this->github->api('git')->tags()->all('typo3-ter', $extension->getKey());
+
+				foreach ($tags as $tag) {
+					$existingTags[] = trim($tag['ref'], 'refs/tags/');
+				}
+			} catch (\Exception $e) {
+				if (array_key_exists($extension->getKey(), $this->existingRepositories) === FALSE) {
+					$this->github->api('repository')->create($extension->getKey(), '', 'http://typo3.org/extensions/repository/view/' . $extension->getKey(), TRUE, 'typo3-ter');
+				}
+
+				$extension->setRepositoryPath($this->existingRepositories[$extension->getKey()]);
+				$this->beanstalk->putInTube('extensions', serialize($extension));
+			}
+			$versions = $extension->getVersions();
+			foreach ($versions as $version) {
+				echo $version->getNumber();
+				if (in_array($version->getNumber(), $existingTags)) {
+					$this->output->writeln('Version ' . $version->getNumber() . ' is already tagged');
+					$extension->removeVersion($version);
+				}
+			}
 		}
 	}
 
