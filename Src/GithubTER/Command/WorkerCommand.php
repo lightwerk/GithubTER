@@ -183,6 +183,13 @@ class WorkerCommand extends Console\Command\Command {
 				$this->github->api('repository')->commits()->all('typo3-ter', $extension->getKey(), array());
 				$this->output->writeln('Commit found -> pulling');
 				exec('cd ' . escapeshellarg($extensionDir) . ' && git pull -q origin master');
+				// move .git dir out, remove everything and move it back in
+				exec('cd ' . escapeshellarg($extensionDir)
+						. ' mv .git ../.tmpgit'
+						. ' rm -rf * .*'
+						. ' mv ../.tmpgit .git'
+				);
+
 			} catch (\Exception $e) {
 				$this->output->writeln('No Commit found');
 			}
@@ -211,8 +218,9 @@ class WorkerCommand extends Console\Command\Command {
 						. ' && git add -A'
 						. ' && git commit -m "Import of Version ' . $extensionVersion->getNumber() . '"'
 						. ' && git tag -a -m "Version ' . $extensionVersion->getNumber() . '" ' . $extensionVersion->getNumber()
-						. ' && git push --tags origin master'
+						. ' '
 				);
+
 			}
 		}
 
