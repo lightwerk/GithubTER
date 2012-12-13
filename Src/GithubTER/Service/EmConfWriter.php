@@ -34,7 +34,7 @@ namespace GithubTER\Service;
 
 class EmConfWriter {
 
-	public function constructEmConf(array $extensionData, \GithubTER\Domain\Model\Version $extensionVersion = NULL) {
+	public function constructEmConf(array $extensionData = array(), \GithubTER\Domain\Model\Version $extensionVersion = NULL) {
 		if (!is_null($extensionVersion)) {
 			$extensionData['EM_CONF']['constraints'] = $this->convertDependencies($extensionVersion->getDependencies());
 		}

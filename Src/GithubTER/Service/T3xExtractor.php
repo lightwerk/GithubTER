@@ -115,14 +115,16 @@ class T3xExtractor {
 	}
 
 	protected function writeExtensionFiles() {
-		foreach ($this->files['FILES'] as $file) {
-			file_put_contents($this->extensionDir . $file['name'], $file['content']);
+		if (is_array($this->files['FILES'])) {
+			foreach ($this->files['FILES'] as $file) {
+				file_put_contents($this->extensionDir . $file['name'], $file['content']);
+			}
 		}
 	}
 
 	protected function writeExtEmconf() {
 		$emConfWriter = new EmConfWriter();
-		$content = $emConfWriter->constructEmConf($this->files, $this->extensionVersion);
+		$content = $emConfWriter->constructEmConf((array)$this->files, $this->extensionVersion);
 
 		file_put_contents($this->extensionDir . 'ext_emconf.php', $content);
 	}
@@ -172,6 +174,6 @@ class T3xExtractor {
 		return $this->extensionVersion;
 	}
 
-
 }
+
 ?>
