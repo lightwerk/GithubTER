@@ -123,7 +123,6 @@ class WorkerCommand extends Console\Command\Command {
 		}
 
 		foreach ($mappedResult as $extension) {
-			echo '=>' . $extension->getKey() . chr(10);
 			$existingTags = array();
 			try {
 				$tags = $this->github->api('git')->tags()->all('typo3-ter', $extension->getKey());
@@ -141,7 +140,6 @@ class WorkerCommand extends Console\Command\Command {
 			}
 			$versions = $extension->getVersions();
 			foreach ($versions as $version) {
-				echo $version->getNumber();
 				if (in_array($version->getNumber(), $existingTags)) {
 					$this->output->writeln('Version ' . $version->getNumber() . ' is already tagged');
 					$extension->removeVersion($version);
