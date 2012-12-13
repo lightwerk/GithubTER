@@ -46,6 +46,8 @@ class ExtensionMapper extends XmlMapper {
 	 */
 	protected $toDate = 991352658149;
 
+	protected $allowedExtensions = array();
+
 	/**
 	 * @param string $path Loads a extensions.xml
 	 * @throws \GithubTER\Exception\InvalidPathException
@@ -59,45 +61,54 @@ class ExtensionMapper extends XmlMapper {
 		$this->loadXml(file_get_contents($path));
 	}
 
-	public function run() {
+	/**
+	 * @param string $extensionList
+	 */
+	public function run($extensionList = '') {
+		$this->allowedExtensions = explode(',', $extensionList);
+
 		$this->mappedResult = new \SplObjectStorage();
 		$extensions = $this->simpleXmlElement;
 
 		foreach ($extensions->extension as $extension) {
-			$extensionObj = new Model\Extension();
-			$extensionObj->setKey((string)$extension['extensionkey']);
+			$key = (string)$extension['extensionkey'];
 
-			foreach ($extension->version as $version) {
-				if (
-					(int)$version->lastuploaddate >= $this->getFromDate()
-					&& (int)$version->lastuploaddate <= $this->getToDate()
-				) {
-					$authorObj = $this->mapAuthor(new Model\Author(), $version);
+			if ($this->extensionExistsAsArgument($key)) {
+				$extensionObj = new Model\Extension();
+				$extensionObj->setKey($key);
 
-					/** @var $versionObj \GithubTER\Domain\Model\Version */
-					$versionObj = $this->mapVersion(new Model\Version(), $version);
-					$versionObj->setAuthor($authorObj);
-					$versionObj->setDependencies((string)$version->dependencies);
-					$versionObj->setDescription((string)$version->description);
-					$versionObj->setState((string)$version->state);
-					$versionObj->setReviewState((string)$version->reviewstate);
-					$versionObj->setCategory((string)$version->category);
-					$versionObj->setDownloadcounter((string)$version->downloadcounter);
-					$versionObj->setUploadComment((string)$version->uploadcomment);
-					$versionObj->setT3xFileMd5((string)$version->t3xfilemd5);
+				foreach ($extension->version as $version) {
+					if (
+						(int)$version->lastuploaddate >= $this->getFromDate()
+						&& (int)$version->lastuploaddate <= $this->getToDate()
+					) {
+						$authorObj = $this->mapAuthor(new Model\Author(), $version);
+
+						/** @var $versionObj \GithubTER\Domain\Model\Version */
+						$versionObj = $this->mapVersion(new Model\Version(), $version);
+						$versionObj->setAuthor($authorObj);
+						$versionObj->setDependencies((string)$version->dependencies);
+						$versionObj->setDescription((string)$version->description);
+						$versionObj->setState((string)$version->state);
+						$versionObj->setReviewState((string)$version->reviewstate);
+						$versionObj->setCategory((string)$version->category);
+						$versionObj->setDownloadcounter((string)$version->downloadcounter);
+						$versionObj->setUploadComment((string)$version->uploadcomment);
+						$versionObj->setT3xFileMd5((string)$version->t3xfilemd5);
 
 
-					$extensionObj->setTitle((string)$version->title);
-					$extensionObj->setDescription((string)$version->description);
-					$extensionObj->setState((string)$version->state);
-					$extensionObj->setLastModified((int)$version->lastuploaddate);
-					$extensionObj->addVersion($versionObj);
+						$extensionObj->setTitle((string)$version->title);
+						$extensionObj->setDescription((string)$version->description);
+						$extensionObj->setState((string)$version->state);
+						$extensionObj->setLastModified((int)$version->lastuploaddate);
+						$extensionObj->addVersion($versionObj);
+					}
 				}
-			}
-			$extensionObj->addAuthor($authorObj);
+				$extensionObj->addAuthor($authorObj);
 
-			if (count($extensionObj->getVersions()) > 0) {
-				$this->mappedResult->attach($extensionObj);
+				if (count($extensionObj->getVersions()) > 0) {
+					$this->mappedResult->attach($extensionObj);
+				}
 			}
 		}
 	}
@@ -132,6 +143,22 @@ class ExtensionMapper extends XmlMapper {
 		$versionObj->setUploadDate((int)$version->lastuploaddate);
 
 		return $versionObj;
+	}
+
+	/**
+	 *
+	 * @param $extension
+	 * @return bool
+	 */
+	protected function extensionExistsAsArgument($extension) {
+		if (count($this->allowedExtensions) === 0) {
+			return TRUE;
+		}
+		if (in_array($extension, $this->allowedExtensions)) {
+			return TRUE;
+		}
+
+		return FALSE;
 	}
 
 	/**

@@ -90,9 +90,14 @@ class WorkerCommand extends Console\Command\Command {
 	}
 
 	protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output) {
+		print_r($input);
 		if ($input->getOption('parse') === TRUE) {
 			$output->writeln('Starting parser (file: ' . $this->input->getArgument('extensionlist') . ')');
-			$this->parse();
+			$extensions = $this->input->getArgument('extensions');
+			if (!empty($extensions )) {
+				$output->writeln(sprintf(TAB . 'including the extensions "%s".', $extensions));
+			}
+			$this->parse($extensions);
 		}
 
 		if ($input->getOption('tag')) {
@@ -104,10 +109,13 @@ class WorkerCommand extends Console\Command\Command {
 		}
 	}
 
-	protected function parse() {
+	/**
+	 * @param string $extensionList
+	 */
+	protected function parse($extensionList = '') {
 		$mapper = new \GithubTER\Mapper\ExtensionMapper();
 		$mapper->loadExtensionList($this->input->getArgument('extensionlist'));
-		$mapper->run();
+		$mapper->run($extensionList);
 		$mappedResult = $mapper->getMappedResult();
 
 		$organizationRepositories = $this->github->api('organization')->repositories('typo3-ter');
@@ -116,33 +124,30 @@ class WorkerCommand extends Console\Command\Command {
 		}
 
 		foreach ($mappedResult as $extension) {
-			$existingTags = array();
-			try {
-				$tags = $this->github->api('git')->tags()->all('typo3-ter', $extension->getKey());
-
-				foreach ($tags as $tag) {
-					$existingTags[] = trim($tag['ref'], 'refs/tags/');
-				}
-			} catch (\Exception $e) {
-				if (array_key_exists($extension->getKey(), $this->existingRepositories) === FALSE) {
-					$this->github->api('repository')->create($extension->getKey(), '', 'http://typo3.org/extensions/repository/view/' . $extension->getKey(), TRUE, 'typo3-ter');
-				}
-
-				$extension->setRepositoryPath($this->existingRepositories[$extension->getKey()]);
-				$this->beanstalk->putInTube('extensions', serialize($extension));
-			}
-			$versions = $extension->getVersions();
-			foreach ($versions as $version) {
-				echo $version->getNumber();
-				if (in_array($version->getNumber(), $existingTags)) {
-					$this->output->writeln('Version ' . $version->getNumber() . ' is already tagged');
-					$extension->removeVersion($version);
-				}
-			}
-
-			//print_r($existingTags);
-			//print_r($extension);
-			die();
+			echo '=>' . $extension->getKey() . chr(10);
+//			$existingTags = array();
+//			try {
+//				$tags = $this->github->api('git')->tags()->all('typo3-ter', $extension->getKey());
+//
+//				foreach ($tags as $tag) {
+//					$existingTags[] = trim($tag['ref'], 'refs/tags/');
+//				}
+//			} catch (\Exception $e) {
+//				if (array_key_exists($extension->getKey(), $this->existingRepositories) === FALSE) {
+//					$this->github->api('repository')->create($extension->getKey(), '', 'http://typo3.org/extensions/repository/view/' . $extension->getKey(), TRUE, 'typo3-ter');
+//				}
+//
+//				$extension->setRepositoryPath($this->existingRepositories[$extension->getKey()]);
+//				$this->beanstalk->putInTube('extensions', serialize($extension));
+//			}
+//			$versions = $extension->getVersions();
+//			foreach ($versions as $version) {
+//				echo $version->getNumber();
+//				if (in_array($version->getNumber(), $existingTags)) {
+//					$this->output->writeln('Version ' . $version->getNumber() . ' is already tagged');
+//					$extension->removeVersion($version);
+//				}
+//			}
 		}
 	}
 

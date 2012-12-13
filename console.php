@@ -61,6 +61,12 @@ $application->add(new GithubTER\Command\WorkerCommand('worker'))
 				Console\Input\InputOption::VALUE_NONE,
 				'Parses the extension list and fills the queue'
 			)
+			->addArgument(
+				'extensions',
+				NULL,
+				'List of extensions?',
+				''
+			)
 			->addOption(
 				'tag',
 				't',
@@ -78,6 +84,7 @@ $application->add(new GithubTER\Command\WorkerCommand('worker'))
 				NULL,
 				'Path to the extensions.xml-file',
 				getcwd() . '/Temp/extensions.xml'
-			);
+			)
+			;
 $application->run();
 ?>
