@@ -50,7 +50,7 @@ class Author {
 	/**
 	 * @var string
 	 */
-	protected $companty;
+	protected $company;
 
 	/**
 	 * @param string $email
@@ -97,15 +97,15 @@ class Author {
 	/**
 	 * @param string $companty
 	 */
-	public function setCompanty($companty) {
-		$this->companty = $companty;
+	public function setCompany($companty) {
+		$this->company = $companty;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getCompanty() {
-		return $this->companty;
+	public function getCompany() {
+		return $this->company;
 	}
 
 }

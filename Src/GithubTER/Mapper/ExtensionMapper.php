@@ -124,7 +124,7 @@ class ExtensionMapper extends XmlMapper {
 		$authorObj->setEmail((string)$version->authoremail);
 		$authorObj->setName((string)$version->authorname);
 		$authorObj->setUsername((string)$version->ownerusername);
-		$authorObj->setCompanty((string)$version->authorcompany);
+		$authorObj->setCompany((string)$version->authorcompany);
 
 		return $authorObj;
 	}
