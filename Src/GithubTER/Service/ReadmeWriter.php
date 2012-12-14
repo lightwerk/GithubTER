@@ -81,7 +81,7 @@ class ReadmeWriter {
 		$dataContent = '';
 		$dataTable = array(
 			array('Version', $this->version->getNumber() . ' ' . $this->version->getState()),
-			array('Release date', date($this->version->getUploadDate()), 'd.M Y'),
+			array('Release date', date('d. F Y', $this->version->getUploadDate())),
 			array('Author', $this->version->getAuthor()->getName()),
 			array('Comment', $this->version->getUploadComment()),
 		);
@@ -91,7 +91,7 @@ class ReadmeWriter {
 			}
 		}
 		if (!empty($dataContent)) {
-			$dataContent .= LF . '<table>' . LF . $dataContent . '</table>';
+			$dataContent = LF . '<table>' . LF . $dataContent . '</table>';
 		}
 
 		$content = '# TYPO3 Extension "' . $this->extension->getKey() . '"
