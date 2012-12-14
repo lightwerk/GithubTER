@@ -205,7 +205,7 @@ class WorkerCommand extends Console\Command\Command {
 				unlink($t3xPath);
 
 				$this->output->writeln('Generate custom README.md');
-				$readmeWriter = new Service\ReadmeWriter($extension);
+				$readmeWriter = new Service\ReadmeWriter($extension, $extensionVersion);
 				$readmeWriter->write();
 
 				$this->output->writeln('Committing, tagging and pushing version ' . $extensionVersion->getNumber());

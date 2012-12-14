@@ -32,10 +32,16 @@ class ReadmeWriter {
 	/**
 	 * @var \GithubTER\Domain\Model\Extension
 	 */
-	protected $extension = '';
+	protected $extension;
 
-	public function __construct($extension) {
+	/**
+	 * @var \GithubTER\Domain\Model\Version
+	 */
+	protected $version;
+
+	public function __construct($extension, $version) {
 		$this->extension = $extension;
+		$this->version = $version;
 	}
 
 	public function write() {
@@ -66,12 +72,28 @@ class ReadmeWriter {
 		file_put_contents($this->getFilePath(), $content);
 	}
 
+	/**
+	 * Generate the content for the custom Readme.md file
+	 *
+	 * @return string
+	 */
 	protected function getContent() {
-		$content = '
-		## TYPO3 Extension \'' . $this->extension->getKey() . '\' ##
+		$content = '## TYPO3 Extension \'' . $this->extension->getKey() . '\' ##' . LF;
+		$content .= $this->version->getUploadComment() . LF;
 
+		$dataContent = '';
+		$dataTable = array(
+			array('Version', $this->version->getNumber() . ' ' . $this->version->getState()),
+			array('Release date', date($this->version->getUploadDate()), 'd.M Y'),
+			array('Author', $this->version->getAuthor()),
+		);
+		foreach ($dataTable as $data) {
+			$dataContent .= '<tr><td>' . $data[0] . '</td><td>' . $data[1] . '</td></tr>';
+		}
+		if (!empty($dataContent)) {
+			$content .= '<table>' . $dataContent . '</table>';
+		}
 
-		';
 		$content .= self::ENDLINE_IDENTIFIER;
 		return $content;
 	}

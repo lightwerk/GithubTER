@@ -123,7 +123,7 @@ class Version {
 	}
 
 	/**
-	 * @param \GithubTER\Domain\Model\Version $state
+	 * @param string
 	 */
 	public function setState($state) {
 		$this->state = $state;
