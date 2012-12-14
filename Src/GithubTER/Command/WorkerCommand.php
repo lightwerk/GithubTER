@@ -177,6 +177,8 @@ class WorkerCommand extends Console\Command\Command {
 				'cd ' . escapeshellarg($extensionDir)
 					. ' && git init'
 					. ' && git remote add origin ' . str_replace('git@github.com', 'git@github-ter', $extension->getRepositoryPath())
+					. ' && git config user.name "TYPO3-TER Bot"'
+					. ' && git config user.email "typo3ter-bot@ringerge.org"'
 			);
 
 			try {
