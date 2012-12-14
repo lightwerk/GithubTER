@@ -94,10 +94,16 @@ class ReadmeWriter {
 			$dataContent = LF . '<table>' . LF . $dataContent . '</table>';
 		}
 
+		$insecureExtensionText = '';
+		if ($this->version->getReviewState() == -1) {
+			$insecureExtensionText = '** BE AWARE: This extension has been marked as insecure by the security team! **.';
+		}
+
 		$content = '# TYPO3 Extension "' . $this->extension->getKey() . '"
 ' . $this->extension->getDescription() . '
 
 ## Version ' . $this->version->getNumber() . '
+' . $insecureExtensionText . '
 
 
 ' . $dataContent . '
