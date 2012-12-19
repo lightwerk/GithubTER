@@ -16,3 +16,6 @@
 [submodule "vendor/Buzz"]
 	path = vendor/Buzz
 	url = git://github.com/kriswallsmith/Buzz.git
+[submodule "vendor/Symfony/Component/Config"]
+	path = vendor/Symfony/Component/Config
+	url = git://github.com/symfony/Config.git
