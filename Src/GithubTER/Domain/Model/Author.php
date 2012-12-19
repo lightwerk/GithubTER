@@ -24,11 +24,10 @@
 
 
 /**
- * Author of an extension (version=
+ * Author of an extension (version)
  *
- * @author    Philipp Bergsmann <p.bergsmann@opendo.at>
+ * @author Philipp Bergsmann <p.bergsmann@opendo.at>
  */
-
 namespace GithubTER\Domain\Model;
 
 class Author {

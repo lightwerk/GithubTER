@@ -24,16 +24,16 @@
 
 
 /**
- * $DESCRIPTION$
+ * Mapps the extensions-XML-file to domain-objects
  *
- * @author    Philipp Bergsmann <p.bergsmann@opendo.at>
- * @package $PACKAGE$
- * @subpackage $SUBPACKAGE$
+ * @author Philipp Bergsmann <p.bergsmann@opendo.at>
+ * @author Georg Ringer <typo3@ringerge.org>
+ * @package GithubTER
  */
-
 namespace GithubTER\Mapper;
-use GithubTER\Exception as Exception;
-use GithubTER\Domain\Model as Model;
+
+use GithubTER\Exception;
+use GithubTER\Domain\Model;
 
 class ExtensionMapper extends XmlMapper {
 	/**

@@ -25,9 +25,8 @@
 /**
  * Version of an extension
  *
- * @author    Philipp Bergsmann <p.bergsmann@opendo.at>
+ * @author Philipp Bergsmann <p.bergsmann@opendo.at>
  */
-
 namespace GithubTER\Domain\Model;
 
 class Version {

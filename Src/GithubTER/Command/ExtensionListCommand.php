@@ -24,25 +24,19 @@
 
 
 /**
- * $DESCRIPTION$
+ * The ExtensionList-Command retrieves a new extension-list from a ter-mirror (mirror-URL is configured in Settings.yml
+ * with the key "Services.TER.ExtensionListUrl"). The other possibility is to output some information about the local
+ * extensions-xml like last-update-date or filesize.
  *
- * @author    Philipp Bergsmann <p.bergsmann@opendo.at>
- * @package $PACKAGE$
- * @subpackage $SUBPACKAGE$
+ * @author Philipp Bergsmann <p.bergsmann@opendo.at>
+ * @author Georg Ringer
+ * @package GithubTER
  */
 namespace GithubTER\Command;
 
-use Symfony\Component\Console as Console;
+use Symfony\Component\Console;
 
-class ExtensionListCommand extends Console\Command\Command {
-	/**
-	 * @var Console\Output\OutputInterface
-	 */
-	protected $output;
-
-	protected function initialize(Console\Input\InputInterface $input, Console\Output\OutputInterface $output) {
-		$this->output = $output;
-	}
+class ExtensionListCommand extends BaseCommand {
 	/**
 	 * Downloads the extensions.xml
 	 *
@@ -69,20 +63,20 @@ class ExtensionListCommand extends Console\Command\Command {
 	protected function download() {
 		$this->output->writeln(array(
 			'Starting download',
-			'from: "' . $this->getExtensionListUrl() . '"',
-			'to: "' . $this->getTempPath() . '"'
+			'from: "' . $this->configurationManager->get('Services.TER.ExtensionListUrl') . '"',
+			'to: "' . $this->configurationManager->get('TempDir') . '"'
 		));
 
-		if (is_dir($this->getTempPath()) === FALSE) {
-			$this->output->writeln('Temp-Path "' . $this->getTempPath() . ' didn_t exist: creating.');
-			mkdir($this->getTempPath());
+		if (is_dir($this->configurationManager->get('TempDir')) === FALSE) {
+			$this->output->writeln('Temp-Path "' . $this->configurationManager->get('TempDir') . ' didn_t exist: creating.');
+			mkdir($this->configurationManager->get('TempDir'));
 		}
 
-		file_put_contents($this->getTempPath() . '/extensions.xml.gz', file_get_contents($this->getExtensionListUrl()));
+		file_put_contents($this->configurationManager->get('TempDir') . '/extensions.xml.gz', file_get_contents($this->configurationManager->get('Services.TER.ExtensionListUrl')));
 
 		$this->output->writeln(
 			'Finished download (' . round(
-				(filesize($this->getTempPath() . '/extensions.xml.gz') / 1024 / 1024),
+				(filesize($this->configurationManager->get('TempDir') . '/extensions.xml.gz') / 1024 / 1024),
 				2)
 			. 'MB)'
 		);
@@ -94,8 +88,8 @@ class ExtensionListCommand extends Console\Command\Command {
 	 * @return void
 	 */
 	protected function uncompress() {
-		$srcName = $this->getTempPath() . '/extensions.xml.gz';
-		$dstName = $this->getTempPath() . '/extensions.xml';
+		$srcName = $this->configurationManager->get('TempDir') . '/extensions.xml.gz';
+		$dstName = $this->configurationManager->get('TempDir') . '/extensions.xml';
 
 		$this->output->writeln('Starting to uncompress');
 		$sfp = gzopen($srcName, "rb");
@@ -107,7 +101,7 @@ class ExtensionListCommand extends Console\Command\Command {
 		gzclose($sfp);
 		fclose($fp);
 
-		$this->output->writeln('Uncompressing complete (' . round(filesize($this->getTempPath() . '/extensions.xml') / 1024 / 1024, 2) . 'MB)');
+		$this->output->writeln('Uncompressing complete (' . round(filesize($dstName) / 1024 / 1024, 2) . 'MB)');
 	}
 
 	/**
@@ -116,27 +110,15 @@ class ExtensionListCommand extends Console\Command\Command {
 	 * @return void
 	 */
 	protected function info() {
-		if (is_file($this->getTempPath() . '/extensions.xml')) {
+		if (is_file($this->configurationManager->get('TempDir') . '/extensions.xml')) {
 			$this->output->writeln(array(
-				'Last update: ' . date('r', filemtime($this->getTempPath() . '/extensions.xml')),
-				'Filesize: ' . round(filesize($this->getTempPath() . '/extensions.xml') / 1024 / 1024) . 'MB'
+				'Last update: ' . date('r', filemtime($this->configurationManager->get('TempDir') . '/extensions.xml')),
+				'Filesize: ' . round(filesize($this->configurationManager->get('TempDir') . '/extensions.xml') / 1024 / 1024) . 'MB',
+				'Extension-List-URL: ' . $this->configurationManager->get('Services.TER.ExtensionListUrl')
 			));
 		} else {
 			$this->output->writeln('No extension list yet downloaded!');
 		}
-	}
-
-	/**
-	 * Returns the url of the extlist-XML
-	 *
-	 * @return string
-	 */
-	protected function getExtensionListUrl() {
-		return 'http://typo3.org/fileadmin/ter/extensions.xml.gz';
-	}
-
-	protected function getTempPath() {
-		return getcwd() . '/Temp';
 	}
 }
 ?>

@@ -24,11 +24,10 @@
 
 
 /**
- * $DESCRIPTION$
+ * Implements a CURL-download-interface
  *
- * @author    Philipp Bergsmann <p.bergsmann@opendo.at>
- * @package $PACKAGE$
- * @subpackage $SUBPACKAGE$
+ * @author Philipp Bergsmann <p.bergsmann@opendo.at>
+ * @package GithubTer
  */
 namespace GithubTER\Service\Download;
 

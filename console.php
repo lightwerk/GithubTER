@@ -25,11 +25,10 @@
 
 
 /**
- * $DESCRIPTION$
+ * Main CLI-Script. Executes the commands.
  *
- * @author    Philipp Bergsmann <p.bergsmann@opendo.at>
- * @package $PACKAGE$
- * @subpackage $SUBPACKAGE$
+ * @author Philipp Bergsmann <p.bergsmann@opendo.at>
+ * @package GithubTER
  */
 require_once __DIR__.'/Src/Autoload.php';
 

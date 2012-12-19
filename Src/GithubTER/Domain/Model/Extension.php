@@ -26,11 +26,9 @@
 /**
  * $DESCRIPTION$
  *
- * @author    Philipp Bergsmann <p.bergsmann@opendo.at>
- * @package $PACKAGE$
- * @subpackage $SUBPACKAGE$
+ * @author Philipp Bergsmann <p.bergsmann@opendo.at>
+ * @package GithubTER
  */
-
 namespace GithubTER\Domain\Model;
 
 class Extension {

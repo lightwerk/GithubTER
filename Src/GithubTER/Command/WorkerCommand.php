@@ -24,33 +24,24 @@
 
 
 /**
- * $DESCRIPTION$
+ * Main Command. Executes the parser or the tagger.
  *
- * @author    Philipp Bergsmann <p.bergsmann@opendo.at>
- * @package $PACKAGE$
- * @subpackage $SUBPACKAGE$
+ * @author Philipp Bergsmann <p.bergsmann@opendo.at>
+ * @author Georg Ringer
+ * @package GithubTER
  */
 namespace GithubTER\Command;
 
-use Symfony\Component\Console as Console;
-use GithubTER\Service as Service;
-use GithubTER\Domain\Model as Model;
+use Symfony\Component\Console;
+use GithubTER\Service;
+use GithubTER\Domain\Model;
+use GithubTER\Configuration;
 
-class WorkerCommand extends Console\Command\Command {
+class WorkerCommand extends BaseCommand {
 	/**
 	 * @var \Pheanstalk
 	 */
 	protected $beanstalk;
-
-	/**
-	 * @var Console\Output\OutputInterface
-	 */
-	protected $output;
-
-	/**
-	 * @var Console\Input\InputInterface
-	 */
-	protected $input;
 
 	/**
 	 * @var Service\Download\DownloadInterface
@@ -75,20 +66,29 @@ class WorkerCommand extends Console\Command\Command {
 	/**
 	 * Connects to the beanstalk server
 	 *
-	 * @param \Symfony\Component\Console\Input\InputInterface $input
-	 * @param \Symfony\Component\Console\Output\OutputInterface $output
+	 * @param Console\Input\InputInterface $input
+	 * @param Console\Output\OutputInterface $output
 	 * @return void
 	 */
 	protected function initialize(Console\Input\InputInterface $input, Console\Output\OutputInterface $output) {
-		$this->beanstalk = new \Pheanstalk('ec2-79-125-88-135.eu-west-1.compute.amazonaws.com');
-		$this->output = $output;
-		$this->input = $input;
+		$this->beanstalk = new \Pheanstalk($this->configurationManager->get('Services.Beanstalkd.Server'));
 		$this->downloadService = new Service\Download\Curl();
 		$this->t3xExtractor = new Service\T3xExtractor();
 		$this->github = new \Github\Client();
-		$this->github->authenticate('4ed2c0f777b22e9d14ddf4dc99b9ff2b5701e290', '', \Github\Client::AUTH_HTTP_TOKEN);
+		$this->github->authenticate(
+				$this->configurationManager->get('Services.Github.AuthToken'),
+				'',
+				\Github\Client::AUTH_HTTP_TOKEN
+			);
 	}
 
+	/**
+	 * Main method. Forwards the call to the executing methods.
+	 *
+	 * @param Console\Input\InputInterface $input
+	 * @param Console\Output\OutputInterface $output
+	 * @return int|null|void
+	 */
 	protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output) {
 		if ($input->getOption('parse') === TRUE) {
 			$output->writeln('Starting parser (file: ' . $this->input->getArgument('extensionlist') . ')');
@@ -109,7 +109,10 @@ class WorkerCommand extends Console\Command\Command {
 	}
 
 	/**
+	 * Parses the extensions.xml and fills the job-queue. Checks if a version is tagged on Github and excludes it.
+	 *
 	 * @param string $extensionList
+	 * @return void
 	 */
 	protected function parse($extensionList = '') {
 		$mapper = new \GithubTER\Mapper\ExtensionMapper();
@@ -148,6 +151,11 @@ class WorkerCommand extends Console\Command\Command {
 		}
 	}
 
+	/**
+	 * Downloads the T3X-files, inits the GIT-repository, pushes and tags the release.
+	 *
+	 * @return void
+	 */
 	protected function tag() {
 		$this->output->writeln(array(
 			'Starting the tagger',
@@ -161,7 +169,7 @@ class WorkerCommand extends Console\Command\Command {
 		$extension = unserialize($job->getData());
 		$this->output->writeln('Starting job ' . $job->getId() . ': "' . $extension->getKey() . '"');
 
-		$extensionDir = $this->getTempPath() . '/Extension/' . $extension->getKey() . '/';
+		$extensionDir = $this->configurationManager->get('TempDir') . '/Extension/' . $extension->getKey() . '/';
 
 		foreach ($extension->getVersions() as $extensionVersion) {
 			if (is_dir($extensionDir)) {
@@ -176,7 +184,7 @@ class WorkerCommand extends Console\Command\Command {
 			exec(
 				'cd ' . escapeshellarg($extensionDir)
 					. ' && git init'
-					. ' && git remote add origin ' . str_replace('git@github.com', 'git@github-ter', $extension->getRepositoryPath())
+					. ' && git remote add origin ' . $extension->getRepositoryPath()
 					. ' && git config user.name "TYPO3-TER Bot"'
 					. ' && git config user.email "typo3ter-bot@ringerge.org"'
 			);
@@ -185,7 +193,7 @@ class WorkerCommand extends Console\Command\Command {
 				$this->github->api('repository')->commits()->all('typo3-ter', $extension->getKey(), array());
 				$this->output->writeln('Commit found -> pulling');
 				exec('cd ' . escapeshellarg($extensionDir) . ' && git pull -q origin master');
-				// move .git dir out, remove everything and move it back in
+					// delete all files excluding the .git directory
 				exec('cd ' . escapeshellarg($extensionDir) . ' find . -path "*/.git*" -o -delete');
 
 			} catch (\Exception $e) {
@@ -226,16 +234,17 @@ class WorkerCommand extends Console\Command\Command {
 		$this->beanstalk->delete($job);
 	}
 
+	/**
+	 * Fetches all jobs from the queue and deletes them
+	 *
+	 * @return void
+	 */
 	protected function clearqueue() {
 		while ($job = $this->beanstalk->watch('extensions')->reserve()) {
 			$this->output->writeln('Deleting job #' . $job->getId());
 			$this->beanstalk->delete($job);
 		}
 		$this->output->writeln('Finished clearing the queue');
-	}
-
-	protected function getTempPath() {
-		return getcwd() . '/Temp';
 	}
 }
 
