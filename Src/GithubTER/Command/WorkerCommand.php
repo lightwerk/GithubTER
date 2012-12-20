@@ -72,7 +72,7 @@ class WorkerCommand extends BaseCommand {
 	 */
 	protected function initialize(Console\Input\InputInterface $input, Console\Output\OutputInterface $output) {
 		parent::initialize($input, $output);
-		
+
 		$this->beanstalk = new \Pheanstalk($this->configurationManager->get('Services.Beanstalkd.Server'));
 		$this->downloadService = new Service\Download\Curl();
 		$this->t3xExtractor = new Service\T3xExtractor();
@@ -128,6 +128,8 @@ class WorkerCommand extends BaseCommand {
 		}
 
 		foreach ($mappedResult as $extension) {
+			/** @var $extension \GithubTER\Domain\Model\Extension */
+
 			$existingTags = array();
 			try {
 				$tags = $this->github->api('git')->tags()->all('typo3-ter', $extension->getKey());
@@ -141,8 +143,8 @@ class WorkerCommand extends BaseCommand {
 				}
 
 				$extension->setRepositoryPath($this->existingRepositories[$extension->getKey()]);
-				$this->beanstalk->putInTube('extensions', serialize($extension));
 			}
+
 			$versions = $extension->getVersions();
 			foreach ($versions as $version) {
 				if (in_array($version->getNumber(), $existingTags)) {
@@ -150,6 +152,12 @@ class WorkerCommand extends BaseCommand {
 					$extension->removeVersion($version);
 				}
 			}
+
+			if (count($extension->getVersions()) > 0) {
+				$this->beanstalk->putInTube('extensions', serialize($extension));
+			} else {
+				$this->output->writeln('Extension ' . $extension->getKey() . ' is ignored, all versions tagged already.');
+			 }
 		}
 	}
 
