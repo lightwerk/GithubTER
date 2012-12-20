@@ -56,12 +56,9 @@ class ConfigurationManager {
 
 		$locator = new FileLocator($configDirectories);
 
-		$loader = new Loader\YamlLoader($locator);
-
-		$configuration = array(
-			$loader->load($locator->locate(self::SETTINGS_DEFAULT_FILENAME)),
-			$loader->load($locator->locate(self::SETTINGS_LOCAL_FILENAME)),
-		);
+		$configuration = array();
+		$this->addConfigurationFile($configuration, $locator, self::SETTINGS_DEFAULT_FILENAME);
+		$this->addConfigurationFile($configuration, $locator, self::SETTINGS_LOCAL_FILENAME);
 
 		$processor = new Processor();
 		$settings = new Settings();
@@ -88,5 +85,23 @@ class ConfigurationManager {
 
 		return $configuration;
 	}
+
+	/**
+	 * Add a configuration file
+	 *
+	 * @param $configuration
+	 * @param $locator
+	 * @param $file
+	 * @return void
+	 */
+	protected function addConfigurationFile(&$configuration, $locator, $file ) {
+		$loader = new Loader\YamlLoader($locator);
+		try {
+			$configuration[] = $loader->load($locator->locate($file));
+		} catch (\InvalidArgumentException $e) {
+
+		}
+	}
+
 }
 ?>
