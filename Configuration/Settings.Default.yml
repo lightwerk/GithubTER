@@ -7,4 +7,5 @@ Services:
   Beanstalkd:
     Server: ec2-79-125-88-135.eu-west-1.compute.amazonaws.com
   TER:
-    ExtensionListUrl: http://typo3.org/fileadmin/ter/extensions.xml.gz
+    ExtensionListUrl: https://typo3.org/fileadmin/ter/extensions.xml.gz
+    ExtensionDownloadUrl: http://typo3.org/extensions/repository/download/

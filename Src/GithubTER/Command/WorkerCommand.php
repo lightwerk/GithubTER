@@ -203,7 +203,7 @@ class WorkerCommand extends BaseCommand {
 			$t3xPath = $extensionDir . $extension->getKey() . '.t3x';
 			$this->output->writeln('Downloading version ' . $extensionVersion->getNumber());
 
-			$downloadedExtension = @file_get_contents('http://typo3.org/extensions/repository/download/' . $extension->getKey() . '/' . $extensionVersion->getNumber() . '/t3x/');
+			$downloadedExtension = @file_get_contents(	$this->configurationManager->get('Services.TER.ExtensionDownloadUrl') . $extension->getKey() . '/' . $extensionVersion->getNumber() . '/t3x/');
 			if ($downloadedExtension === FALSE) {
 				$this->output->writeln(sprintf('ERROR: Version "%s" of extension "%s" could not be downloaded!', $extensionVersion->getNumber(), $extension->getKey()));
 			} else {
