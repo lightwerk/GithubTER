@@ -77,6 +77,8 @@ class ExtensionMapper extends XmlMapper {
 				$extensionObj = new Model\Extension();
 				$extensionObj->setKey($key);
 
+				$temporaryVersions = array();
+
 				foreach ($extension->version as $version) {
 					if (
 						(int)$version->lastuploaddate >= $this->getFromDate()
@@ -101,9 +103,16 @@ class ExtensionMapper extends XmlMapper {
 						$extensionObj->setDescription((string)$version->description);
 						$extensionObj->setState((string)$version->state);
 						$extensionObj->setLastModified((int)$version->lastuploaddate);
-						$extensionObj->addVersion($versionObj);
+
+						$temporaryVersions[self::convertVersionNumberToInteger($versionObj->getNumber())] = $versionObj;
 					}
 				}
+
+				ksort($temporaryVersions);
+				foreach($temporaryVersions as $v) {
+					$extensionObj->addVersion($v);
+				}
+
 				$extensionObj->addAuthor($authorObj);
 
 				if (count($extensionObj->getVersions()) > 0) {
@@ -187,6 +196,17 @@ class ExtensionMapper extends XmlMapper {
 	 */
 	public function getToDate() {
 		return $this->toDate;
+	}
+
+	/**
+	 * Returns an integer from a three part version number, eg '4.12.3' -> 4012003
+	 *
+	 * @param string $versionNumber Version number on format x.x.x
+	 * @return integer Integer version of version number (where each part can count to 999)
+	 */
+	static public function convertVersionNumberToInteger($versionNumber) {
+		$versionParts = explode('.', $versionNumber);
+		return intval(((int) $versionParts[0] . str_pad((int) $versionParts[1], 3, '0', STR_PAD_LEFT)) . str_pad((int) $versionParts[2], 3, '0', STR_PAD_LEFT));
 	}
 }
 
