@@ -71,6 +71,8 @@ class WorkerCommand extends BaseCommand {
 	 * @return void
 	 */
 	protected function initialize(Console\Input\InputInterface $input, Console\Output\OutputInterface $output) {
+		parent::initialize($input, $output);
+		
 		$this->beanstalk = new \Pheanstalk($this->configurationManager->get('Services.Beanstalkd.Server'));
 		$this->downloadService = new Service\Download\Curl();
 		$this->t3xExtractor = new Service\T3xExtractor();

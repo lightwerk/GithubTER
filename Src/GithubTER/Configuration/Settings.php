@@ -73,6 +73,8 @@ class Settings implements ConfigurationInterface{
 							->children()
 								->scalarNode('ExtensionListUrl')
 								->end()
+								->scalarNode('ExtensionDownloadUrl')
+								->end()
 							->end()
 						->end();
 
