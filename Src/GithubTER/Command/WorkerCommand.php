@@ -154,7 +154,7 @@ class WorkerCommand extends BaseCommand {
 			}
 
 			if (count($extension->getVersions()) > 0) {
-				$this->beanstalk->putInTube('extensions', serialize($extension));
+				$this->beanstalk->putInTube('extensions', gzcompress(serialize($extension), 9));
 			} else {
 				$this->output->writeln('Extension ' . $extension->getKey() . ' is ignored, all versions tagged already.');
 			 }
@@ -176,7 +176,7 @@ class WorkerCommand extends BaseCommand {
 		$job = $this->beanstalk->watch('extensions')->reserve();
 
 		/** @var $extension Model\Extension */
-		$extension = unserialize($job->getData());
+		$extension = unserialize(gzuncompress($job->getData()));
 		$this->output->writeln('Starting job ' . $job->getId() . ': "' . $extension->getKey() . '"');
 
 		$extensionDir = $this->configurationManager->get('TempDir') . '/Extension/' . $extension->getKey() . '/';
