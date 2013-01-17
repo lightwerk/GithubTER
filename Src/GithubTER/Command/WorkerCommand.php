@@ -142,9 +142,9 @@ class WorkerCommand extends BaseCommand {
 					$createdRepository = $this->github->api('repository')->create($extension->getKey(), '', 'http://typo3.org/extensions/repository/view/' . $extension->getKey(), TRUE, 'typo3-ter');
 					$this->existingRepositories[$extension->getKey()] = $createdRepository['ssh_url'];
 				}
-
-				$extension->setRepositoryPath($this->existingRepositories[$extension->getKey()]);
 			}
+
+			$extension->setRepositoryPath($this->existingRepositories[$extension->getKey()]);
 
 			$versions = $extension->getVersions();
 			foreach ($versions as $version) {
