@@ -1,0 +1,5 @@
+<phpunit bootstrap="./Tests/GithubTER/Bootstrap.php" colors="true">
+    <testsuite name="GithubTER">
+        <directory>./Tests</directory>
+    </testsuite>
+</phpunit>
