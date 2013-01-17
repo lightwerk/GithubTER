@@ -205,7 +205,10 @@ class WorkerCommand extends BaseCommand {
 				$this->output->writeln('Commit found -> pulling');
 				exec('cd ' . escapeshellarg($extensionDir) . ' && git pull -q origin master');
 					// delete all files excluding the .git directory
-				exec('cd ' . escapeshellarg($extensionDir) . ' find . -path "*/.git*" -o -delete');
+				exec('cd ' . escapeshellarg($extensionDir)
+					. ' mv .git ../.tmpgit'
+					. ' rm -rf * .*'
+					. ' mv ../.tmpgit .git');
 
 			} catch (\Exception $e) {
 				$this->output->writeln('No Commit found');
