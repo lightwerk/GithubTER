@@ -61,7 +61,7 @@ class WorkerCommand extends BaseCommand {
 	/**
 	 * @var array
 	 */
-	protected $existingRepositories;
+	protected $existingRepositories = array();
 
 	/**
 	 * Connects to the beanstalk server
