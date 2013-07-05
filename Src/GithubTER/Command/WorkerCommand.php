@@ -122,7 +122,7 @@ class WorkerCommand extends BaseCommand {
 		$mapper->run($extensionList);
 		$mappedResult = $mapper->getMappedResult();
 
-		$organizationRepositories = $this->github->api('organization')->repositories('typo3-ter');
+		$organizationRepositories = $this->github->api('organization')->repositories($this->configurationManager->get('Services.Github.OrganizationName'));
 		foreach ($organizationRepositories as $organizationRepository) {
 			$this->existingRepositories[$organizationRepository['name']] = $organizationRepository['ssh_url'];
 		}
@@ -132,14 +132,20 @@ class WorkerCommand extends BaseCommand {
 
 			$existingTags = array();
 			try {
-				$tags = $this->github->api('git')->tags()->all('typo3-ter', $extension->getKey());
+				$tags = $this->github->api('git')->tags()->all($this->configurationManager->get('Services.Github.OrganizationName'), $extension->getKey());
 
 				foreach ($tags as $tag) {
 					$existingTags[] = trim($tag['ref'], 'refs/tags/');
 				}
 			} catch (\Exception $e) {
 				if (array_key_exists($extension->getKey(), $this->existingRepositories) === FALSE) {
-					$createdRepository = $this->github->api('repository')->create($extension->getKey(), '', 'http://typo3.org/extensions/repository/view/' . $extension->getKey(), TRUE, 'typo3-ter');
+					$createdRepository = $this->github->api('repository')->create(
+						$extension->getKey(),
+						'',
+						'http://typo3.org/extensions/repository/view/' . $extension->getKey(),
+						TRUE,
+						$this->configurationManager->get('Services.Github.OrganizationName')
+					);
 					$this->existingRepositories[$extension->getKey()] = $createdRepository['ssh_url'];
 				}
 			}
@@ -196,12 +202,16 @@ class WorkerCommand extends BaseCommand {
 				'cd ' . escapeshellarg($extensionDir)
 					. ' && git init'
 					. ' && git remote add origin ' . $extension->getRepositoryPath()
-					. ' && git config user.name "TYPO3-TER Bot"'
-					. ' && git config user.email "typo3ter-bot@ringerge.org"'
+					. ' && git config user.name "' . $this->configurationManager->get('Environment.Git.Username') . '"'
+					. ' && git config user.email "' . $this->configurationManager->get('Environment.Git.Email') . '"'
 			);
 
 			try {
-				$this->github->api('repository')->commits()->all('typo3-ter', $extension->getKey(), array());
+				$this->github->api('repository')->commits()->all(
+					$this->configurationManager->get('Services.Github.OrganizationName'),
+					$extension->getKey(),
+					array()
+				);
 				$this->output->writeln('Commit found -> pulling');
 				exec('cd ' . escapeshellarg($extensionDir) . ' && git pull -q origin master');
 					// delete all files excluding the .git directory
