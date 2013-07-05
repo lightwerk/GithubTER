@@ -1,5 +1,9 @@
 TempDir: Temp
 
+Environment:
+  Git:
+    Username: LW TER MIRROR
+    Email: typo3ter-bot@ringerge.org
 Services:
   Github:
     AuthToken: 4ed2c0f777b22e9d14ddf4dc99b9ff2b5701e290
