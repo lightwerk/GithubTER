@@ -232,6 +232,10 @@ class WorkerCommand extends BaseCommand {
 				$readmeWriter = new Service\ReadmeWriter($extension, $extensionVersion);
 				$readmeWriter->write();
 
+				$this->output->writeln('Generate composer.json');
+				$composerJsonWriter = new Service\ComposerJsonWriter($extension);
+				$composerJsonWriter->write();
+
 				$this->output->writeln('Committing, tagging and pushing version ' . $extensionVersion->getNumber());
 				exec(
 					'cd ' . escapeshellarg($extensionDir)
